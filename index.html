@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand IPAS Hotel Master - Game Pembelajaran Perhotelan</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// Database Materi & Soal IPAS Perhotelan
+const gameModules = [
+    {
+        id: "sanitasi_k3",
+        title: "1. Sanitasi, Higiene & K3",
+        desc: "Kelola kebersihan area hotel dan keselamatan kerja para staf.",
+        icon: "shield-check",
+        color: "from-blue-600 to-cyan-500",
+        questions: [
+            {
+                id: 1,
+                scenario: "Seorang Housekeeping mengalami iritasi kulit saat membersihkan kerak air lunak di kamar mandi menggunakan pembersih asam. Tindakan K3 dan keilmuan kimia apa yang terabaikan?",
+                options: [
+                    "Tidak menggunakan sarung tangan karet (APD) & tidak memahami tingkat pH larutan pembersih",
+                    "Tidak menyalakan pendingin ruangan saat bekerja di kamar mandi",
+                    "Memakai pembersih berbahan dasar basa tinggi tanpa menggunakan kacamata pelindung",
+                    "Mencampur bahan kimia asam dengan air hangat tanpa mengaduknya"
+                ],
+                answer: 0,
+                explanation: "Pembersih kerak berbahan asam dapat merusak jaringan kulit. APD berupa sarung tangan dan pemahaman tingkat keasaman (pH) sangat penting untuk mencegah luka bakar kimia."
+            },
+            {
+                id: 2,
+                scenario: "Di dapur utama hotel (Kitchen), terjadi kebakaran akibat korsleting listrik pada fryer digital. APAR jenis apa yang paling tepat digunakan?",
+                options: [
+                    "APAR Jenis Air (Water)",
+                    "APAR Jenis Karbon Dioksida (CO2) / Kimia Kering (Dry Chemical Class C/K)",
+                    "APAR Jenis Busa (Foam AFFF)",
+                    "Penyiraman langsung menggunakan air keran tekanan tinggi"
+                ],
+                answer: 1,
+                explanation: "Kebakaran akibat peralatan listrik dan minyak masak panas memerlukan APAR Karbon Dioksida (CO2) atau Kimia Kering khusus agar tidak menghantarkan arus listrik."
+            }
+        ]
+    },
+    {
+        id: "kimia_pembersih",
+        title: "2. Kimia Laundry & Housekeeping",
+        desc: "Pahami reaktifitas bahan pembersih kimia untuk kain dan permukaan hotel.",
+        icon: "sparkles",
+        color: "from-purple-600 to-pink-500",
+        questions: [
+            {
+                id: 3,
+                scenario: "Tamu hotel mengeluhkan sprei katun putih bernoda darah. Staf Laundry harus memilih bahan pembersih yang tepat agar noda hilang tanpa merusak serat kain. Bahan apa yang digunakan?",
+                options: [
+                    "Air panas 100°C dan pemutih klorin dosis tinggi",
+                    "Enzim pembersih (Protease) dan air dingin/hangat",
+                    "Larutan asam klorida (HCl) pekat",
+                    "Detergen alkalis tinggi tanpa pembilasan"
+                ],
+                answer: 1,
+                explanation: "Darah mengandung protein. Air panas justru mendenaturasi dan menggumpalkan protein pada serat. Enzim protease memecah protein darah secara optimal pada suhu sedang."
+            },
+            {
+                id: 4,
+                scenario: "Staf Housekeeping menyatukan pemutih (Sodium Hypochlorite) dengan pembersih lantai bernoda asam klorida. Reaksi bahaya apa yang timbul?",
+                options: [
+                    "Menghasilkan zat beracun Gas Klorin (Cl2) yang fatal jika terhirup",
+                    "Menghasilkan busa melimpah yang ramah lingkungan",
+                    "Reaksi netralisasi sempurna menghasilkan air murni",
+                    "Menghasilkan endapan garam kristal yang memperlicin lantai"
+                ],
+                answer: 0,
+                explanation: "Pencampuran pemutih berbahan kaporit/hipoklorit dengan larutan asam menghasilkan gas klorin berbahaya yang sangat beracun bagi saluran pernapasan."
+            }
+        ]
+    },
+    {
+        id: "energi_lingkungan",
+        title: "3. Energi & Pengolahan Limbah",
+        desc: "Terapkan prinsip Eco-Green Hotel dan efisiensi energi fisik.",
+        icon: "leaf",
+        color: "from-emerald-600 to-teal-500",
+        questions: [
+            {
+                id: 5,
+                scenario: "Dapur hotel menghasilkan limbah minyak goreng bekas (used cooking oil) dalam jumlah besar setiap minggu. Pengolahan limbah sosial & lingkungan yang ramah sesuai prinsip IPAS adalah...",
+                options: [
+                    "Mebuangnya ke saluran pembuangan air utama (drainase) setelah dicampur detergen",
+                    "Mengolahnya menjadi bahan bakar alternatif (Biodiesel) atau disetorkan ke pengolah limbah resmi",
+                    "Menguburnya di area taman hotel agar menyuburkan tanah",
+                    "Membakarnya di area terbuka belakang hotel"
+                ],
+                answer: 1,
+                explanation: "Minyak jelantah dapat menyumbat saluran air (grease trap) dan merusak ekosistem tanah/air. Daur ulang menjadi biodiesel adalah langkah green-hotel yang ramah lingkungan."
+            },
+            {
+                id: 6,
+                scenario: "Hotel ingin mengurangi konsumsi listrik AC di lobby tanpa mengurangi kenyamanan thermal tamu. Langkah IPAS arsitektur lingkungan yang tepat adalah...",
+                options: [
+                    "Menutup rapat seluruh jendela dan mematikan AC di siang hari",
+                    "Menerapkan ventilasi silang (cross ventilation) dan penanaman vegetasi peneduh",
+                    "Mengganti seluruh lampu dengan watt tinggi agar suhu udara meningkat",
+                    "Menggunakan kipas angin dalam jumlah puluhan secara bersamaan"
+                ],
+                answer: 1,
+                explanation: "Prinsip fisika lingkungan menunjukkan bahwa sirkulasi udara alami (cross ventilation) dan peneduh vegetasi menurunkan suhu ruangan secara efisien tanpa beban energi tinggi."
+            }
+        ]
+    },
+    {
+        id: "sosial_interaksi",
+        title: "4. Interaksi Sosial & Pelayanan",
+        desc: "Atasi dinamika sosial, komunikasi efektif, dan keberagaman budaya tamu.",
+        icon: "users",
+        color: "from-amber-600 to-orange-500",
+        questions: [
+            {
+                id: 7,
+                scenario: "Seorang tamu mancanegara menyampaikan keluhan dengan nada tinggi akibat perbedaan standar budaya (culture shock) mengenai waktu check-in. Sikap sosiologis staf Front Office adalah...",
+                options: [
+                    "Membalas dengan nada keras agar tamu menghormati aturan lokal",
+                    "Menerapkan empati, mendengarkan aktif, dan menjelaskan regulasi secara santun",
+                    "Abaikan tamu tersebut dan melayani tamu lain di antrean",
+                    "Meminta keamanan mengusir tamu keluar dari area hotel"
+                ],
+                answer: 1,
+                explanation: "Interaksi sosial berbasis kompetensi lintas budaya memerlukan empati, penguasaan emosi, dan komunikasi persuasif tanpa merendahkan norma sosial tamu maupun operasional."
+            }
+        ]
+    }
+];
+
+function App() {
+    const [gameState, setGameState] = useState('welcome'); // welcome, map, quiz, summary
+    const [selectedModule, setSelectedModule] = useState(null);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [score, setScore] = useState(0);
+    const [hotelReputation, setHotelReputation] = useState(70); // 0 - 100%
+    const [selectedOption, setSelectedOption] = useState(null);
+    const [showExplanation, setShowExplanation] = useState(false);
+    const [completedModules, setCompletedModules] = useState([]);
+
+    const handleStartGame = () => {
+        setGameState('map');
+    };
+
+    const handleSelectModule = (mod) => {
+        setSelectedModule(mod);
+        setCurrentQuestionIndex(0);
+        setSelectedOption(null);
+        setShowExplanation(false);
+        setGameState('quiz');
+    };
+
+    const handleAnswer = (index) => {
+        if (selectedOption !== null) return;
+        setSelectedOption(index);
+        setShowExplanation(true);
+
+        const currentQ = selectedModule.questions[currentQuestionIndex];
+        if (index === currentQ.answer) {
+            setScore(prev => prev + 100);
+            setHotelReputation(prev => Math.min(100, prev + 5));
+        } else {
+            setHotelReputation(prev => Math.max(0, prev - 10));
+        }
+    };
+
+    const handleNextQuestion = () => {
+        if (currentQuestionIndex + 1 < selectedModule.questions.length) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            setSelectedOption(null);
+            setShowExplanation(false);
+        } else {
+            // Module completed
+            if (!completedModules.includes(selectedModule.id)) {
+                setCompletedModules([...completedModules, selectedModule.id]);
+            }
+            if (completedModules.length + 1 >= gameModules.length) {
+                setGameState('summary');
+            } else {
+                setGameState('map');
+            }
+        }
+    };
+
+    return (
+        <div class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+            {/* Header / Navbar */}
+            <header class="bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
+                <div class="max-w-5xl mx-auto flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 bg-amber-500 rounded-lg text-slate-950 font-bold">
+                            🏨
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg leading-tight text-amber-400">Grand IPAS Hotel Master</h1>
+                            <p class="text-xs text-slate-400">Simulasi & Pembelajaran IPAS Perhotelan</p>
+                        </div>
+                    </div>
+
+                    {gameState !== 'welcome' && (
+                        <div class="flex items-center space-x-6 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-slate-400">Reputasi Hotel:</span>
+                                <span class={`font-extrabold px-2 py-1 rounded ${hotelReputation >= 75 ? 'bg-emerald-950 text-emerald-400 border border-emerald-700' : hotelReputation >= 50 ? 'bg-amber-950 text-amber-400 border border-amber-700' : 'bg-rose-950 text-rose-400 border border-rose-700'}`}>
+                                    ⭐ {hotelReputation}%
+                                </span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-slate-400">Skor:</span>
+                                <span class="font-bold text-amber-400 text-base">{score}</span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </header>
+
+            {/* Main Container */}
+            <main class="flex-grow flex items-center justify-center p-4">
+                <div class="w-full max-w-4xl">
+
+                    {/* WELCOME SCREEN */}
+                    {gameState === 'welcome' && (
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center relative overflow-hidden">
+                            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl"></div>
+                            <div class="absolute -left-10 -top-10 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl"></div>
+                            
+                            <span class="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
+                                Game Edukasi SMK Perhotelan
+                            </span>
+                            <h2 class="text-3xl md:text-5xl font-extrabold mb-4 text-slate-50">
+                                Tingkatkan Bintang Hotelmu Dengan Penerapan <span class="text-amber-400">IPAS!</span>
+                            </h2>
+                            <p class="text-slate-400 max-w-2xl mx-auto mb-8 text-sm md:text-base leading-relaxed">
+                                Selamat datang, General Manager! Hadapi berbagai skenario nyata di hotel—mulai dari keamanan kimia pembersih, pengelolaan limbah dapur, keselamatan kerja K3, hingga interaksi sosial pelayanan tamu.
+                            </p>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-2xl mb-1">🧼</div>
+                                    <h4 class="font-bold text-sm text-slate-200">Kimia Pembersih</h4>
+                                    <p class="text-xs text-slate-400">Sanitasi & Laundry</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-2xl mb-1">🧯</div>
+                                    <h4 class="font-bold text-sm text-slate-200">K3 & Keselamatan</h4>
+                                    <p class="text-xs text-slate-400">Keamanan Operasional</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-2xl mb-1">🌱</div>
+                                    <h4 class="font-bold text-sm text-slate-200">Eco-Hotel</h4>
+                                    <p class="text-xs text-slate-400">Limbah & Energi</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-2xl mb-1">🤝</div>
+                                    <h4 class="font-bold text-sm text-slate-200">Sosiologi Tamu</h4>
+                                    <p class="text-xs text-slate-400">Komunikasi Efektif</p>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={handleStartGame}
+                                class="w-full md:w-auto px-8 py-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0 text-lg">
+                                Mulai Tugas GM Hotel 🚀
+                            </button>
+                        </div>
+                    )}
+
+                    {/* MAP / MODULE SELECTOR */}
+                    {gameState === 'map' && (
+                        <div>
+                            <div class="mb-6 flex justify-between items-end">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-slate-100">Area Misi Operasional</h2>
+                                    <p class="text-sm text-slate-400">Pilih divisi hotel yang membutuhkan solusi pengetahuan IPAS Anda.</p>
+                                </div>
+                                <div class="text-xs text-slate-400 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+                                    Misi Selesai: <span class="text-amber-400 font-bold">{completedModules.length}/{gameModules.length}</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {gameModules.map((mod) => {
+                                    const isDone = completedModules.includes(mod.id);
+                                    return (
+                                        <div 
+                                            key={mod.id}
+                                            onClick={() => handleSelectModule(mod)}
+                                            class={`group relative bg-slate-900 border rounded-2xl p-6 cursor-pointer transition transform hover:-translate-y-1 hover:shadow-xl ${isDone ? 'border-emerald-500/50 bg-slate-900/80' : 'border-slate-800 hover:border-slate-700'}`}>
+                                            
+                                            <div class="flex items-start justify-between mb-4">
+                                                <div class={`p-3 rounded-xl bg-gradient-to-br ${mod.color} text-white font-bold text-xl shadow-md`}>
+                                                    {mod.id === 'sanitasi_k3' && '🧯'}
+                                                    {mod.id === 'kimia_pembersih' && '🧪'}
+                                                    {mod.id === 'energi_lingkungan' && '♻️'}
+                                                    {mod.id === 'sosial_interaksi' && '👥'}
+                                                </div>
+                                                {isDone && (
+                                                    <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-1 rounded-full font-semibold">
+                                                        ✓ Tuntas
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <h3 class="font-bold text-lg text-slate-100 group-hover:text-amber-400 transition mb-1">
+                                                {mod.title}
+                                            </h3>
+                                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">
+                                                {mod.desc}
+                                            </p>
+
+                                            <div class="flex items-center text-xs font-semibold text-amber-400">
+                                                <span>Mulai Misi Divisi</span>
+                                                <span class="ml-1 group-hover:translate-x-1 transition">→</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {completedModules.length === gameModules.length && (
+                                <div class="mt-8 text-center">
+                                    <button 
+                                        onClick={() => setGameState('summary')}
+                                        class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl shadow-lg transition">
+                                        Lihat Evaluasi Akhir Hotel 🏆
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* QUIZ SCREEN */}
+                    {gameState === 'quiz' && selectedModule && (
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-2xl">
+                            {/* Quiz Header */}
+                            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                                <div>
+                                    <span class="text-xs text-amber-400 font-semibold uppercase tracking-wider">
+                                        {selectedModule.title}
+                                    </span>
+                                    <h3 class="text-xs text-slate-400">Skenario {currentQuestionIndex + 1} dari {selectedModule.questions.length}</h3>
+                                </div>
+                                <button 
+                                    onClick={() => setGameState('map')}
+                                    class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition">
+                                    ← Peta Misi
+                                </button>
+                            </div>
+
+                            {/* Question Scenario */}
+                            <div class="mb-6">
+                                <h3 class="text-lg md:text-xl font-bold text-slate-100 leading-snug mb-3">
+                                    {selectedModule.questions[currentQuestionIndex].scenario}
+                                </h3>
+                            </div>
+
+                            {/* Options */}
+                            <div class="space-y-3 mb-6">
+                                {selectedModule.questions[currentQuestionIndex].options.map((opt, idx) => {
+                                    let btnStyle = "bg-slate-800/60 border-slate-700 text-slate-200 hover:border-slate-500 hover:bg-slate-800";
+                                    
+                                    if (selectedOption !== null) {
+                                        if (idx === selectedModule.questions[currentQuestionIndex].answer) {
+                                            btnStyle = "bg-emerald-950/80 border-emerald-500 text-emerald-200 font-semibold";
+                                        } else if (idx === selectedOption) {
+                                            btnStyle = "bg-rose-950/80 border-rose-500 text-rose-200";
+                                        } else {
+                                            btnStyle = "bg-slate-900 border-slate-800 text-slate-500 opacity-50";
+                                        }
+                                    }
+
+                                    return (
+                                        <button 
+                                            key={idx}
+                                            disabled={selectedOption !== null}
+                                            onClick={() => handleAnswer(idx)}
+                                            class={`w-full text-left p-4 rounded-xl border transition flex items-start space-x-3 text-sm md:text-base ${btnStyle}`}>
+                                            <span class="font-bold border border-slate-600 rounded-lg w-6 h-6 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                                                {String.fromCharCode(65 + idx)}
+                                            </span>
+                                            <span class="flex-grow">{opt}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Explanation Box */}
+                            {showExplanation && (
+                                <div class="bg-slate-800/80 border border-slate-700 p-5 rounded-xl mb-6 text-sm">
+                                    <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2">
+                                        💡 Analisis IPAS & Operasional:
+                                    </h4>
+                                    <p class="text-slate-300 leading-relaxed">
+                                        {selectedModule.questions[currentQuestionIndex].explanation}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Next Button */}
+                            {selectedOption !== null && (
+                                <div class="flex justify-end">
+                                    <button 
+                                        onClick={handleNextQuestion}
+                                        class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center space-x-2">
+                                        <span>{currentQuestionIndex + 1 < selectedModule.questions.length ? "Lanjut Skenario Berikutnya" : "Selesaikan Misi Divisi"}</span>
+                                        <span>→</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* SUMMARY SCREEN */}
+                    {gameState === 'summary' && (
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center shadow-2xl">
+                            <div class="text-5xl mb-4">🏆</div>
+                            <h2 class="text-3xl font-extrabold text-slate-50 mb-2">Evaluasi Kinerja Hotel</h2>
+                            <p class="text-slate-400 text-sm mb-6">Berikut adalah hasil keputusan berbasis IPAS yang Anda terapkan:</p>
+
+                            <div class="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-xs text-slate-400 mb-1">Total Skor IPAS</div>
+                                    <div class="text-3xl font-extrabold text-amber-400">{score}</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 p-4 rounded-xl">
+                                    <div class="text-xs text-slate-400 mb-1">Reputasi Hotel</div>
+                                    <div class="text-3xl font-extrabold text-emerald-400">{hotelReputation}%</div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/40 border border-slate-700/60 p-5 rounded-xl text-left max-w-lg mx-auto mb-8 text-sm">
+                                <h4 class="font-bold text-slate-200 mb-2">Catatan Dewan Direksi Hotel:</h4>
+                                <p class="text-slate-300 leading-relaxed">
+                                    {hotelReputation >= 80 
+                                        ? "Sangat luar biasa! Hotel Anda berhasil meraih predikat 5-Star Eco-Green & Safe Hotel karena penerapan konsep kimia, K3, dan sosiologi secara sempurna."
+                                        : "Kinerja baik! Namun perlu peningkatan pemahaman pada manajemen limbah dan K3 keselamatan kerja staf perhotelan."}
+                                </p>
+                            </div>
+
+                            <button 
+                                onClick={() => {
+                                    setScore(0);
+                                    setHotelReputation(70);
+                                    setCompletedModules([]);
+                                    setGameState('welcome');
+                                }}
+                                class="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-lg transition">
+                                Mainkan Ulang Simulasi 🔄
+                            </button>
+                        </div>
+                    )}
+
+                </div>
+            </main>
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
+```eof
+
+### Fitur Utama Game:
+1. **Tema Khusus Perhotelan**: Skenario diambil langsung dari kejadian nyata di dunia perhotelan (*Housekeeping, Laundry, Kitchen, Front Office, Energi & Limbah Hotel*).
+2. **Kesesuaian Materi IPAS SMK**: Menguji konsep kimia pembersih (pH, reaksi klorin, enzim), keselamatan kerja K3 (APAR, APD), efisiensi energi & pengolahan limbah (minyak jelantah, ventilasi silang), serta sosiologi interaksi dengan tamu.
+3. **Mekanik Gameplay**:
+   - Sistem **Reputasi Hotel (%)** dan **Skor**.
+   - Penjelasan teknis sains & operasional langsung di setiap akhir soal.
+   - Peta Divisi Hotel interaktif.
